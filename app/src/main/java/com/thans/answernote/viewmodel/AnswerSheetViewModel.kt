@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class AnswerSheetViewModel : ViewModel() {
+    private val _numberOfQuestions = MutableStateFlow(200)
+    val numberOfQuestions: StateFlow<Int> = _numberOfQuestions.asStateFlow()
+
     private val _answers = MutableStateFlow(
         (1..200).map { QuestionAnswer(questionNumber = it) }
     )
@@ -23,17 +26,39 @@ class AnswerSheetViewModel : ViewModel() {
         }
     }
 
+    fun setNumberOfQuestions(count: Int) {
+        _numberOfQuestions.value = count
+        _answers.value = (1..count).map { QuestionAnswer(questionNumber = it) }
+    }
+
     fun clearAll() {
-        _answers.value = (1..200).map { QuestionAnswer(questionNumber = it) }
+        _answers.value = (1.._numberOfQuestions.value).map { QuestionAnswer(questionNumber = it) }
     }
 
     fun getAnsweredCount(): Int {
         return _answers.value.count { it.selectedAnswer != Answer.NONE }
     }
 
+    fun markAnswerCorrectness(questionNumber: Int, isCorrect: Boolean) {
+        _answers.value = _answers.value.map { question ->
+            if (question.questionNumber == questionNumber) {
+                question.copy(isCorrect = isCorrect)
+            } else {
+                question
+            }
+        }
+    }
+
+    fun getScore(): Pair<Int, Int> {
+        val graded = _answers.value.filter { it.isCorrect != null }
+        val correct = graded.count { it.isCorrect == true }
+        val total = graded.size
+        return Pair(correct, total)
+    }
+
     fun exportAnswers(): String {
         val builder = StringBuilder()
-        builder.append("TOEIC Answer Sheet (200 Questions)\n")
+        builder.append("TOEIC Answer Sheet (${_numberOfQuestions.value} Questions)\n")
         builder.append("=".repeat(40))
         builder.append("\n\n")
 
@@ -48,7 +73,7 @@ class AnswerSheetViewModel : ViewModel() {
 
         builder.append("\n")
         builder.append("=".repeat(40))
-        builder.append("\nTotal Answered: ${getAnsweredCount()}/200\n")
+        builder.append("\nTotal Answered: ${getAnsweredCount()}/${_numberOfQuestions.value}\n")
 
         return builder.toString()
     }

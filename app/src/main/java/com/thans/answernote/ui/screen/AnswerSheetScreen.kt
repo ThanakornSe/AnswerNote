@@ -1,32 +1,31 @@
 package com.thans.answernote.ui.screen
 
-import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thans.answernote.ui.components.QuestionItem
-import com.thans.answernote.ui.components.SummaryDialog
 import com.thans.answernote.viewmodel.AnswerSheetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnswerSheetScreen(
-    viewModel: AnswerSheetViewModel = viewModel()
+    viewModel: AnswerSheetViewModel = viewModel(),
+    onNavigateToSummary: (() -> Unit) = {}
 ) {
     val answers by viewModel.answers.collectAsState()
+    val numberOfQuestions by viewModel.numberOfQuestions.collectAsState()
     val answeredCount = viewModel.getAnsweredCount()
-    var showSummaryDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+    var showSettingsDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -35,12 +34,15 @@ fun AnswerSheetScreen(
                     Column {
                         Text("TOEIC Answer Sheet")
                         Text(
-                            text = "Progress: $answeredCount/200",
+                            text = "Progress: $answeredCount/$numberOfQuestions",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showSettingsDialog = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
                     IconButton(onClick = { showClearDialog = true }) {
                         Icon(Icons.Default.Delete, contentDescription = "Clear All")
                     }
@@ -53,7 +55,7 @@ fun AnswerSheetScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { showSummaryDialog = true },
+                onClick = onNavigateToSummary,
                 icon = { Icon(Icons.Default.Info, contentDescription = "Summary") },
                 text = { Text("Summary") }
             )
@@ -77,23 +79,17 @@ fun AnswerSheetScreen(
         }
     }
 
-    if (showSummaryDialog) {
-        SummaryDialog(
-            answers = answers,
-            answeredCount = answeredCount,
-            onDismiss = { showSummaryDialog = false },
-            onShare = {
-                val shareText = viewModel.exportAnswers()
-                val sendIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, shareText)
-                    type = "text/plain"
-                }
-                val shareIntent = Intent.createChooser(sendIntent, "Share Answer Sheet")
-                context.startActivity(shareIntent)
+    if (showSettingsDialog) {
+        QuestionCountDialog(
+            currentCount = numberOfQuestions,
+            onDismiss = { showSettingsDialog = false },
+            onConfirm = { count ->
+                viewModel.setNumberOfQuestions(count)
+                showSettingsDialog = false
             }
         )
     }
+
 
     if (showClearDialog) {
         AlertDialog(
@@ -120,4 +116,59 @@ fun AnswerSheetScreen(
             }
         )
     }
+}
+
+@Composable
+fun QuestionCountDialog(
+    currentCount: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var selectedCount by remember { mutableStateOf(currentCount) }
+    val questionCounts = listOf(50, 100, 150, 200)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Number of Questions") },
+        text = {
+            Column {
+                Text(
+                    text = "Select the number of questions:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                questionCounts.forEach { count ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        RadioButton(
+                            selected = selectedCount == count,
+                            onClick = { selectedCount = count }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "$count questions",
+                            modifier = Modifier.padding(top = 12.dp),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(selectedCount) }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

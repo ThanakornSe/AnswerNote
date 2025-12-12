@@ -1,6 +1,5 @@
 package com.thans.answernote.ui.components
 
-import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,9 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.thans.answernote.model.Answer
 import com.thans.answernote.model.QuestionAnswer
@@ -22,6 +19,8 @@ fun SummaryDialog(
     onDismiss: () -> Unit,
     onShare: () -> Unit
 ) {
+    val totalQuestions = answers.size
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -60,7 +59,7 @@ fun SummaryDialog(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = "${200 - answeredCount}",
+                                text = "${totalQuestions - answeredCount}",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )
