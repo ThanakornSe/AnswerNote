@@ -20,5 +20,26 @@
             </gradient>
         </aapt:attr>
     </path>
+
+
+<!--    &lt;!&ndash; Gradient Background &ndash;&gt;-->
+<!--    <path android:pathData="M0,0h108v108h-108z">-->
+<!--        <aapt:attr name="android:fillColor">-->
+<!--            <gradient-->
+<!--                android:startY="0"-->
+<!--                android:startX="0"-->
+<!--                android:endY="108"-->
+<!--                android:endX="108"-->
+<!--                android:type="linear">-->
+<!--                <item android:offset="0" android:color="@android:color/system_accent1_100"/>-->
+<!--                <item android:offset="1" android:color="@android:color/system_accent1_600"/>-->
+<!--            </gradient>-->
+<!--        </aapt:attr>-->
+<!--    </path>-->
+
+<!--    &lt;!&ndash; Solid Background with Dynamic Color &ndash;&gt;-->
+<!--    <path-->
+<!--        android:pathData="M0,0h108v108h-108z"-->
+<!--        android:fillColor="@android:color/system_accent1_100"/>-->
 </vector>
 

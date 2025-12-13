@@ -52,6 +52,7 @@ fun QuestionCountDialog(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
                             selected = selectedCount == count,
@@ -62,7 +63,7 @@ fun QuestionCountDialog(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "$count questions",
-                            modifier = Modifier.padding(top = 12.dp),
+                            modifier = Modifier,
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
