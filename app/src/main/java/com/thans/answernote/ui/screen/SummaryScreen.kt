@@ -35,7 +35,7 @@ fun SummaryScreen(
     val answers by viewModel.answers.collectAsState()
     val numberOfQuestions by viewModel.numberOfQuestions.collectAsState()
     val context = LocalContext.current
-
+    
     // Make score reactive - recalculate when answers change
     val score by remember {
         derivedStateOf {
@@ -234,7 +234,7 @@ fun SummaryQuestionItem(
             containerColor = when (question.isCorrect) {
                 true -> Color(0xFFE8F5E9) // Light green
                 false -> Color(0xFFFFEBEE) // Light red
-                null -> MaterialTheme.colorScheme.surface
+                null -> MaterialTheme.colorScheme.primaryContainer
             }
         )
     ) {
@@ -252,7 +252,9 @@ fun SummaryQuestionItem(
             ) {
                 Text(
                     text = "${question.questionNumber}.",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.Black
+                    ),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.width(50.dp)
                 )

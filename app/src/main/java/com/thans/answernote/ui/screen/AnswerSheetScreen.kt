@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.thans.answernote.ui.components.QuestionCountDialog
 import com.thans.answernote.ui.components.QuestionItem
 import com.thans.answernote.viewmodel.AnswerSheetViewModel
 
@@ -118,57 +119,3 @@ fun AnswerSheetScreen(
     }
 }
 
-@Composable
-fun QuestionCountDialog(
-    currentCount: Int,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
-) {
-    var selectedCount by remember { mutableStateOf(currentCount) }
-    val questionCounts = listOf(50, 100, 150, 200)
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Number of Questions") },
-        text = {
-            Column {
-                Text(
-                    text = "Select the number of questions:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-                questionCounts.forEach { count ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        RadioButton(
-                            selected = selectedCount == count,
-                            onClick = { selectedCount = count }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "$count questions",
-                            modifier = Modifier.padding(top = 12.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirm(selectedCount) }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
