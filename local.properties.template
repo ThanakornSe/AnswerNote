@@ -1,0 +1,13 @@
+## This file is a template for local.properties
+# Copy this file to local.properties and fill in your actual values
+# local.properties is gitignored and will not be committed to version control
+
+# Location of the SDK
+sdk.dir=YOUR_SDK_PATH
+
+# Signing configuration
+KEYSTORE_FILE=answerSheetKey.jks
+KEY_ALIAS=your_key_alias
+KEY_PASSWORD=your_key_password
+KEYSTORE_PASSWORD=your_keystore_password
+

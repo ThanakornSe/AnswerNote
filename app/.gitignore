@@ -1,1 +1,6 @@
 /build
+
+# Signing keys - Never commit these!
+*.jks
+*.keystore
+answerSheetKey.jks
