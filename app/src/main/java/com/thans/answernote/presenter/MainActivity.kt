@@ -61,6 +61,9 @@ class MainActivity : ComponentActivity() {
                             AnswerSheetListScreen(
                                 onNavigateToAnswerSheet = { id ->
                                     backStack.add(AnswerSheetMainScreen(answerSheetId = id))
+                                },
+                                onNavigateToSummary = { id ->
+                                    backStack.add(SummaryMainScreen(answerSheetId = id))
                                 }
                             )
                         }
@@ -73,12 +76,17 @@ class MainActivity : ComponentActivity() {
 
                             AnswerSheetScreen(
                                 viewModel = viewModel,
-                                onNavigateToSummary = { backStack.add(SummaryMainScreen) },
+                                onNavigateToSummary = { backStack.add(SummaryMainScreen(answerSheetId = it.answerSheetId)) },
                                 onNavigateBack = { backStack.removeLastOrNull() }
                             )
                         }
                         entry<SummaryMainScreen> {
                             val viewModel: AnswerSheetViewModel = koinViewModel()
+
+                            LaunchedEffect(it.answerSheetId) {
+                                viewModel.loadAnswerSheet(it.answerSheetId)
+                            }
+
                             SummaryScreen(
                                 viewModel = viewModel,
                                 onNavigateBack = { backStack.removeLastOrNull() }

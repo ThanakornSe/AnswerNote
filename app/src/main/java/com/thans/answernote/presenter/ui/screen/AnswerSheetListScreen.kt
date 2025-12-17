@@ -24,7 +24,8 @@ import java.util.*
 @Composable
 fun AnswerSheetListScreen(
     viewModel: AnswerSheetListViewModel = koinViewModel(),
-    onNavigateToAnswerSheet: (Long) -> Unit
+    onNavigateToAnswerSheet: (Long) -> Unit,
+    onNavigateToSummary: (Long) -> Unit
 ) {
     val answerSheets by viewModel.answerSheets.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -82,10 +83,20 @@ fun AnswerSheetListScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(answerSheets, key = { it.id }) { answerSheet ->
+                        val answeredCount = answerSheet.answers.count { it.selectedAnswer != com.thans.answernote.presenter.model.Answer.NONE }
+                        val isFinished = answeredCount == answerSheet.numberOfQuestions && answerSheet.numberOfQuestions > 0
+
                         AnswerSheetCard(
                             answerSheet = answerSheet,
-                            onClick = { onNavigateToAnswerSheet(answerSheet.id) },
-                            onDeleteClick = { answerSheetToDelete = answerSheet }
+                            onClick = {
+                                if (isFinished) {
+                                    onNavigateToSummary(answerSheet.id)
+                                } else {
+                                    onNavigateToAnswerSheet(answerSheet.id)
+                                }
+                            },
+                            onDeleteClick = { answerSheetToDelete = answerSheet },
+                            isFinished = isFinished
                         )
                     }
                 }
@@ -140,7 +151,8 @@ fun AnswerSheetListScreen(
 fun AnswerSheetCard(
     answerSheet: AnswerSheetEntity,
     onClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    isFinished: Boolean = false
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()) }
     val answeredCount = answerSheet.answers.count { it.selectedAnswer != com.thans.answernote.presenter.model.Answer.NONE }
@@ -149,7 +161,14 @@ fun AnswerSheetCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = if (isFinished) {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        } else {
+            CardDefaults.cardColors()
+        }
     ) {
         Row(
             modifier = Modifier
@@ -161,11 +180,26 @@ fun AnswerSheetCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = answerSheet.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = answerSheet.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (isFinished) {
+                        SuggestionChip(
+                            onClick = { },
+                            label = { Text("Completed", style = MaterialTheme.typography.labelSmall) },
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                labelColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Questions: ${answerSheet.numberOfQuestions}",
@@ -175,7 +209,8 @@ fun AnswerSheetCard(
                 Text(
                     text = "Answered: $answeredCount/${answerSheet.numberOfQuestions}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isFinished) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = if (isFinished) FontWeight.Bold else FontWeight.Normal
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(

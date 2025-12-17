@@ -12,6 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.thans.answernote.presenter.model.Answer
+import com.thans.answernote.presenter.ui.components.QuestionCountDialog
+import com.thans.answernote.presenter.ui.components.QuestionItem
 import com.thans.answernote.presenter.viewmodel.AnswerSheetViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -24,9 +27,13 @@ fun AnswerSheetScreen(
 ) {
     val answers by viewModel.answers.collectAsState()
     val numberOfQuestions by viewModel.numberOfQuestions.collectAsState()
-    val answeredCount = viewModel.getAnsweredCount()
+    val answeredCount = remember(answers) {
+        answers.count { it.selectedAnswer != Answer.NONE }
+    }
     var showClearDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
+
+    val isTestFinished = answeredCount == numberOfQuestions && numberOfQuestions > 0
 
     Scaffold(
         topBar = {
@@ -42,7 +49,7 @@ fun AnswerSheetScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -58,35 +65,54 @@ fun AnswerSheetScreen(
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onNavigateToSummary,
-                icon = { Icon(Icons.Default.Info, contentDescription = "Summary") },
-                text = { Text("Summary") }
-            )
         }
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 8.dp)
+                .padding(paddingValues)
         ) {
-            items(answers) { question ->
-                _root_ide_package_.com.thans.answernote.presenter.ui.components.QuestionItem(
-                    questionNumber = question.questionNumber,
-                    selectedAnswer = question.selectedAnswer,
-                    onAnswerSelected = { answer ->
-                        viewModel.selectAnswer(question.questionNumber, answer)
-                    }
-                )
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(answers) { question ->
+                    QuestionItem(
+                        questionNumber = question.questionNumber,
+                        selectedAnswer = question.selectedAnswer,
+                        onAnswerSelected = { answer ->
+                            viewModel.selectAnswer(question.questionNumber, answer)
+                        }
+                    )
+                }
+            }
+
+            // Show button when test is finished
+            if (isTestFinished) {
+                Button(
+                    onClick = onNavigateToSummary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text("View Summary")
+                }
             }
         }
     }
 
     if (showSettingsDialog) {
-        _root_ide_package_.com.thans.answernote.presenter.ui.components.QuestionCountDialog(
+        QuestionCountDialog(
             currentCount = numberOfQuestions,
             onDismiss = { showSettingsDialog = false },
             onConfirm = { count ->

@@ -10,4 +10,4 @@ data object AnswerSheetListScreen : NavKey
 data class AnswerSheetMainScreen(val answerSheetId: Long) : NavKey
 
 @Serializable
-data object SummaryMainScreen : NavKey
+data class SummaryMainScreen(val answerSheetId: Long) : NavKey
