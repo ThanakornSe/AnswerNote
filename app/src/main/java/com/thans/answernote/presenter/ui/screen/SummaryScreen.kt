@@ -411,8 +411,14 @@ fun SummaryQuestionItem(
                 ) {
                     Text(
                         text = "${question.questionNumber}.",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleLarge.copy(color =
+                            when (question.isCorrect) {
+                                true -> Color.Black // Dark green
+                                false -> Color.Black // Dark red
+                                null -> Color.White
+                            }
+                        ),
+                        fontWeight = FontWeight.Bold,
                     )
 
                     // Show selected answer with indicator
