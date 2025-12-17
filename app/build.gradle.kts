@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 // Load local.properties
@@ -94,5 +96,23 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.material3.adaptive.navigation3)
 
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    //Koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.android.compat)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.test)
+    implementation(libs.koin.androidx.compose.navigation)
+
+    //Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network)
+
+    //Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
+    testImplementation(libs.androidx.room.testing)
+
+    implementation(libs.androidx.compose.material.icons.extended)
 }
