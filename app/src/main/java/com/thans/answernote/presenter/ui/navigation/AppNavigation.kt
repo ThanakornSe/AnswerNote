@@ -4,7 +4,10 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object AnswerSheetMainScreen : NavKey
+data object AnswerSheetListScreen : NavKey
+
+@Serializable
+data class AnswerSheetMainScreen(val answerSheetId: Long) : NavKey
 
 @Serializable
 data object SummaryMainScreen : NavKey

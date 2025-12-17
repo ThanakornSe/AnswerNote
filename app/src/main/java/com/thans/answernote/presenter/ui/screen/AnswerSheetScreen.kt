@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -11,16 +12,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.thans.answernote.ui.components.QuestionCountDialog
-import com.thans.answernote.ui.components.QuestionItem
-import com.thans.answernote.viewmodel.AnswerSheetViewModel
+import com.thans.answernote.presenter.viewmodel.AnswerSheetViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnswerSheetScreen(
-    viewModel: com.thans.answernote.presenter.viewmodel.AnswerSheetViewModel = viewModel(),
-    onNavigateToSummary: (() -> Unit) = {}
+    viewModel: AnswerSheetViewModel = koinViewModel(),
+    onNavigateToSummary: (() -> Unit) = {},
+    onNavigateBack: (() -> Unit) = {}
 ) {
     val answers by viewModel.answers.collectAsState()
     val numberOfQuestions by viewModel.numberOfQuestions.collectAsState()
@@ -33,11 +33,16 @@ fun AnswerSheetScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("TOEIC Answer Sheet")
+                        Text("Answer Sheet")
                         Text(
                             text = "Progress: $answeredCount/$numberOfQuestions",
                             style = MaterialTheme.typography.bodySmall
                         )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {

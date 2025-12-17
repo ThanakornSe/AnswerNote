@@ -8,8 +8,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -18,11 +18,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.thans.answernote.core.ui.theme.AnswerNoteTheme
+import com.thans.answernote.presenter.ui.navigation.AnswerSheetListScreen
 import com.thans.answernote.presenter.ui.navigation.AnswerSheetMainScreen
 import com.thans.answernote.presenter.ui.navigation.SummaryMainScreen
+import com.thans.answernote.presenter.ui.screen.AnswerSheetListScreen
 import com.thans.answernote.presenter.ui.screen.AnswerSheetScreen
 import com.thans.answernote.presenter.ui.screen.SummaryScreen
 import com.thans.answernote.presenter.viewmodel.AnswerSheetViewModel
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,11 +33,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AnswerNoteTheme {
-                val viewModel: AnswerSheetViewModel =
-                    viewModel()
-                //var showSummary by remember { mutableStateOf(false) }
                 val backStack: NavBackStack<NavKey> =
-                    rememberNavBackStack(AnswerSheetMainScreen)
+                    rememberNavBackStack(AnswerSheetListScreen)
 
                 NavDisplay(
                     modifier = Modifier.fillMaxSize(),
@@ -57,13 +57,28 @@ class MainActivity : ComponentActivity() {
                                 slideOutHorizontally(targetOffsetX = { it })
                     },
                     entryProvider = entryProvider {
+                        entry<AnswerSheetListScreen> {
+                            AnswerSheetListScreen(
+                                onNavigateToAnswerSheet = { id ->
+                                    backStack.add(AnswerSheetMainScreen(answerSheetId = id))
+                                }
+                            )
+                        }
                         entry<AnswerSheetMainScreen> {
+                            val viewModel: AnswerSheetViewModel = koinViewModel()
+
+                            LaunchedEffect(it.answerSheetId) {
+                                viewModel.loadAnswerSheet(it.answerSheetId)
+                            }
+
                             AnswerSheetScreen(
                                 viewModel = viewModel,
-                                onNavigateToSummary = { backStack.add(SummaryMainScreen) }
+                                onNavigateToSummary = { backStack.add(SummaryMainScreen) },
+                                onNavigateBack = { backStack.removeLastOrNull() }
                             )
                         }
                         entry<SummaryMainScreen> {
+                            val viewModel: AnswerSheetViewModel = koinViewModel()
                             SummaryScreen(
                                 viewModel = viewModel,
                                 onNavigateBack = { backStack.removeLastOrNull() }
