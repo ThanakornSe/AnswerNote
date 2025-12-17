@@ -21,21 +21,37 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        register("sit") {
+            keyAlias = "key0"
+            keyPassword = "nikonD80"
+            storeFile = file("answerSheetKey.jks")
+            storePassword = "nikonD80"
+        }
+    }
+
     buildTypes {
-        release {
+        debug {
+            isDebuggable = true
             isMinifyEnabled = false
+        }
+        release {
+            isDebuggable = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("sit")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "11"
+
+    kotlin {
+        jvmToolchain(17)
     }
     buildFeatures {
         compose = true
