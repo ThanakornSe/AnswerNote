@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +36,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -56,7 +59,9 @@ import com.thans.answernote.presenter.viewmodel.AnswerSheetViewModel
 @Composable
 fun SummaryScreen(
     viewModel: AnswerSheetViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onEditAnswer: () -> Unit = {},
+    onNavigateToList: () -> Unit = {}
 ) {
     val answers by viewModel.answers.collectAsState()
     val numberOfQuestions by viewModel.numberOfQuestions.collectAsState()
@@ -73,6 +78,10 @@ fun SummaryScreen(
     }
     val correctCount = score.first
     val gradedCount = score.second
+
+    // Check if all answered questions are graded
+    val answeredQuestions = answers.filter { it.selectedAnswer != Answer.NONE }
+    val allAnswersGraded = answeredQuestions.isNotEmpty() && answeredQuestions.all { it.correctAnswer != null }
 
     // Track scroll state for header animation
     val listState = rememberLazyListState()
@@ -136,7 +145,7 @@ fun SummaryScreen(
             // Instructions
             item {
                 Text(
-                    text = "Mark each answer as correct or wrong:",
+                    text = "Select the correct answer for each question:",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
@@ -148,11 +157,13 @@ fun SummaryScreen(
             items(answers.filter { it.selectedAnswer != Answer.NONE }) { question ->
                 SummaryQuestionItem(
                     question = question,
-                    onMarkCorrect = { viewModel.markAnswerCorrectness(question.questionNumber, true) },
-                    onMarkWrong = { viewModel.markAnswerCorrectness(question.questionNumber, false) },
+                    onSetCorrectAnswer = { correctAnswer ->
+                        viewModel.setCorrectAnswer(question.questionNumber, correctAnswer)
+                    },
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 8.dp),
+                    onEdit = onEditAnswer
                 )
             }
 
@@ -173,6 +184,27 @@ fun SummaryScreen(
                                 .padding(32.dp),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Show "Back to List" button when all answers are graded
+            if (allAnswersGraded) {
+                item {
+                    Button(
+                        onClick = onNavigateToList,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 16.dp, bottom = 32.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(
+                            text = "Back to Answer Sheets",
+                            style = MaterialTheme.typography.titleMedium
                         )
                     }
                 }
@@ -345,10 +377,12 @@ fun StatItem(
 @Composable
 fun SummaryQuestionItem(
     question: com.thans.answernote.presenter.model.QuestionAnswer,
-    onMarkCorrect: () -> Unit,
-    onMarkWrong: () -> Unit,
-    modifier: Modifier = Modifier
+    onSetCorrectAnswer: (Answer) -> Unit,
+    modifier: Modifier = Modifier,
+    onEdit: () -> Unit = {}
 ) {
+    val allAnswers = listOf(Answer.A, Answer.B, Answer.C, Answer.D)
+
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -356,97 +390,178 @@ fun SummaryQuestionItem(
             containerColor = when (question.isCorrect) {
                 true -> Color(0xFFE8F5E9) // Light green
                 false -> Color(0xFFFFEBEE) // Light red
-                null -> MaterialTheme.colorScheme.primaryContainer
+                null -> MaterialTheme.colorScheme.surface
             }
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            // Question info
+            // Header row with question number and edit button
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "${question.questionNumber}.",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.Black
-                    ),
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(50.dp)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = question.selectedAnswer.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        text = "${question.questionNumber}.",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    // Show selected answer with indicator
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Your answer:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = question.selectedAnswer.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+
+                // Edit button
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .clickable(onClick = onEdit),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit Answer",
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
 
-            // Marking buttons
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Instruction text
+            Text(
+                text = "Select correct answer:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Answer selection buttons
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Correct button
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            color = if (question.isCorrect == true) Color(0xFF4CAF50) else Color.Transparent,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .border(
-                            width = 2.dp,
-                            color = if (question.isCorrect == true) Color(0xFF4CAF50) else Color(0xFF81C784),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .clickable(onClick = onMarkCorrect),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = "Mark as Correct",
-                        tint = if (question.isCorrect == true) Color.White else Color(0xFF4CAF50),
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                allAnswers.forEach { answer ->
+                    val isSelectedAnswer = answer == question.selectedAnswer
+                    val isCorrectAnswer = answer == question.correctAnswer
 
-                // Wrong button
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            color = if (question.isCorrect == false) Color(0xFFF44336) else Color.Transparent,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .border(
-                            width = 2.dp,
-                            color = if (question.isCorrect == false) Color(0xFFF44336) else Color(0xFFE57373),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .clickable(onClick = onMarkWrong),
-                    contentAlignment = Alignment.Center
+                    val backgroundColor = when {
+                        isCorrectAnswer && isSelectedAnswer -> Color(0xFF4CAF50) // Both: Green
+                        isCorrectAnswer && !isSelectedAnswer -> Color(0xFF4CAF50) // Correct answer: Green
+                        !isCorrectAnswer && isSelectedAnswer && question.correctAnswer != null -> Color(0xFFF44336) // Wrong answer: Red
+                        else -> Color.Transparent
+                    }
+
+                    val borderColor = when {
+                        isCorrectAnswer -> Color(0xFF4CAF50)
+                        isSelectedAnswer && question.correctAnswer != null -> Color(0xFFF44336)
+                        else -> MaterialTheme.colorScheme.outline
+                    }
+
+                    val textColor = when {
+                        isCorrectAnswer || (isSelectedAnswer && question.correctAnswer != null) -> Color.White
+                        else -> MaterialTheme.colorScheme.onSurface
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
+                            .background(
+                                color = backgroundColor,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .border(
+                                width = 2.dp,
+                                color = borderColor,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable { onSetCorrectAnswer(answer) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = answer.name,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = textColor
+                            )
+                            if (isCorrectAnswer) {
+                                Text(
+                                    text = "✓",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = textColor
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Result indicator
+            if (question.correctAnswer != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Default.Close,
-                        contentDescription = "Mark as Wrong",
-                        tint = if (question.isCorrect == false) Color.White else Color(0xFFF44336),
-                        modifier = Modifier.size(24.dp)
+                        imageVector = if (question.isCorrect == true) Icons.Default.Check else Icons.Default.Close,
+                        contentDescription = null,
+                        tint = if (question.isCorrect == true) Color(0xFF4CAF50) else Color(0xFFF44336),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = if (question.isCorrect == true) {
+                            "Correct!"
+                        } else {
+                            "Wrong - Correct answer is ${question.correctAnswer.name}"
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (question.isCorrect == true) Color(0xFF4CAF50) else Color(0xFFF44336)
                     )
                 }
             }

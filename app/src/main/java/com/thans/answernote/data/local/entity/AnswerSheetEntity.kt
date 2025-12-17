@@ -14,6 +14,7 @@ import kotlinx.serialization.decodeFromString
 data class QuestionAnswerData(
     val questionNumber: Int,
     val selectedAnswer: Answer = Answer.NONE,
+    val correctAnswer: Answer? = null,
     val isCorrect: Boolean? = null
 )
 

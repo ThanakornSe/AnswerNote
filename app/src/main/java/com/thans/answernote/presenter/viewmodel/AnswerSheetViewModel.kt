@@ -39,6 +39,7 @@ class AnswerSheetViewModel(
                         QuestionAnswer(
                             questionNumber = data.questionNumber,
                             selectedAnswer = data.selectedAnswer,
+                            correctAnswer = data.correctAnswer,
                             isCorrect = data.isCorrect
                         )
                     }
@@ -77,6 +78,25 @@ class AnswerSheetViewModel(
 
     fun getAnsweredCount(): Int {
         return _answers.value.count { it.selectedAnswer != Answer.NONE }
+    }
+
+    fun setCorrectAnswer(questionNumber: Int, correctAnswer: Answer) {
+        _answers.value = _answers.value.map { question ->
+            if (question.questionNumber == questionNumber) {
+                val isCorrect = if (correctAnswer == Answer.NONE) {
+                    null // No correct answer set, so can't determine correctness
+                } else {
+                    question.selectedAnswer == correctAnswer
+                }
+                question.copy(
+                    correctAnswer = correctAnswer,
+                    isCorrect = isCorrect
+                )
+            } else {
+                question
+            }
+        }
+        saveAnswerSheet()
     }
 
     fun markAnswerCorrectness(questionNumber: Int, isCorrect: Boolean) {
@@ -128,6 +148,7 @@ class AnswerSheetViewModel(
                         QuestionAnswerData(
                             questionNumber = answer.questionNumber,
                             selectedAnswer = answer.selectedAnswer,
+                            correctAnswer = answer.correctAnswer,
                             isCorrect = answer.isCorrect
                         )
                     }

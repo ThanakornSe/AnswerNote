@@ -7,7 +7,8 @@ enum class Answer {
 data class QuestionAnswer(
     val questionNumber: Int,
     val selectedAnswer: Answer = Answer.NONE,
-    val isCorrect: Boolean? = null // null = not graded, true = correct, false = wrong
+    val correctAnswer: Answer? = null, // The correct answer for this question
+    val isCorrect: Boolean? = null // null = not graded, true = correct, false = wrong (calculated from correctAnswer)
 )
 
 

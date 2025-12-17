@@ -89,7 +89,21 @@ class MainActivity : ComponentActivity() {
 
                             SummaryScreen(
                                 viewModel = viewModel,
-                                onNavigateBack = { backStack.removeLastOrNull() }
+                                onNavigateBack = { backStack.removeLastOrNull() },
+                                onEditAnswer = {
+                                    // Remove SummaryScreen and add AnswerSheetScreen
+                                    // This works for both navigation paths:
+                                    // 1. List -> AnswerSheet -> Summary (goes back to AnswerSheet)
+                                    // 2. List -> Summary (creates new AnswerSheet)
+                                    backStack.removeLastOrNull()
+                                    backStack.add(AnswerSheetMainScreen(answerSheetId = it.answerSheetId))
+                                },
+                                onNavigateToList = {
+                                    // Navigate back to list, clearing the stack
+                                    while (backStack.size > 1) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                }
                             )
                         }
                     }

@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.thans.answernote.data.local.entity.AnswerSheetEntity
@@ -157,6 +158,16 @@ fun AnswerSheetCard(
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()) }
     val answeredCount = answerSheet.answers.count { it.selectedAnswer != com.thans.answernote.presenter.model.Answer.NONE }
 
+    // Calculate score if answers are graded
+    val gradedAnswers = answerSheet.answers.filter { it.correctAnswer != null }
+    val correctAnswers = gradedAnswers.count { it.isCorrect == true }
+    val isGraded = gradedAnswers.isNotEmpty()
+    val scorePercentage = if (gradedAnswers.isNotEmpty()) {
+        (correctAnswers.toFloat() / gradedAnswers.size * 100).toInt()
+    } else {
+        0
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -212,6 +223,21 @@ fun AnswerSheetCard(
                     color = if (isFinished) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = if (isFinished) FontWeight.Bold else FontWeight.Normal
                 )
+
+                // Show score if graded
+                if (isGraded) {
+                    Text(
+                        text = "Score: $correctAnswers/${gradedAnswers.size} ($scorePercentage%)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = when {
+                            scorePercentage >= 80 -> Color(0xFF4CAF50) // Green for high score
+                            scorePercentage >= 60 -> Color(0xFFFF9800) // Orange for medium score
+                            else -> Color(0xFFF44336) // Red for low score
+                        },
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Updated: ${dateFormat.format(Date(answerSheet.updatedAt))}",
