@@ -1,4 +1,4 @@
-package com.thans.answernote.ui.screen
+package com.thans.answernote.presenter.ui.screen
 
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -29,7 +29,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SummaryScreen(
-    viewModel: AnswerSheetViewModel,
+    viewModel: com.thans.answernote.presenter.viewmodel.AnswerSheetViewModel,
     onNavigateBack: () -> Unit
 ) {
     val answers by viewModel.answers.collectAsState()
@@ -164,7 +164,7 @@ fun SummaryScreen(
             }
 
             // Question Items
-            items(answers.filter { it.selectedAnswer != Answer.NONE }) { question ->
+            items(answers.filter { it.selectedAnswer != _root_ide_package_.com.thans.answernote.presenter.model.Answer.NONE }) { question ->
                 SummaryQuestionItem(
                     question = question,
                     onMarkCorrect = { viewModel.markAnswerCorrectness(question.questionNumber, true) },
@@ -174,7 +174,7 @@ fun SummaryScreen(
             }
 
             // Show message if no answers
-            if (answers.none { it.selectedAnswer != Answer.NONE }) {
+            if (answers.none { it.selectedAnswer != _root_ide_package_.com.thans.answernote.presenter.model.Answer.NONE }) {
                 item {
                     Card(
                         modifier = Modifier
@@ -222,7 +222,7 @@ fun StatItem(
 
 @Composable
 fun SummaryQuestionItem(
-    question: QuestionAnswer,
+    question: com.thans.answernote.presenter.model.QuestionAnswer,
     onMarkCorrect: () -> Unit,
     onMarkWrong: () -> Unit,
     modifier: Modifier = Modifier

@@ -1,4 +1,4 @@
-package com.thans.answernote.ui.components
+package com.thans.answernote.presenter.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

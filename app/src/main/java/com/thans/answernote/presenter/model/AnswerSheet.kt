@@ -1,4 +1,4 @@
-package com.thans.answernote.model
+package com.thans.answernote.presenter.model
 
 enum class Answer {
     A, B, C, D, NONE

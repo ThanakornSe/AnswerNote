@@ -1,4 +1,4 @@
-package com.thans.answernote.ui.components
+package com.thans.answernote.presenter.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,7 +14,7 @@ import com.thans.answernote.model.QuestionAnswer
 
 @Composable
 fun SummaryDialog(
-    answers: List<QuestionAnswer>,
+    answers: List<com.thans.answernote.presenter.model.QuestionAnswer>,
     answeredCount: Int,
     onDismiss: () -> Unit,
     onShare: () -> Unit
@@ -93,9 +93,9 @@ fun SummaryDialog(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = if (question.selectedAnswer == Answer.NONE) "-" else question.selectedAnswer.name,
+                                text = if (question.selectedAnswer == _root_ide_package_.com.thans.answernote.presenter.model.Answer.NONE) "-" else question.selectedAnswer.name,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (question.selectedAnswer == Answer.NONE) {
+                                color = if (question.selectedAnswer == _root_ide_package_.com.thans.answernote.presenter.model.Answer.NONE) {
                                     MaterialTheme.colorScheme.outline
                                 } else {
                                     MaterialTheme.colorScheme.primary

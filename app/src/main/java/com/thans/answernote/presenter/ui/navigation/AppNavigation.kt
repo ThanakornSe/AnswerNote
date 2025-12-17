@@ -1,4 +1,4 @@
-package com.thans.answernote.ui.navigation
+package com.thans.answernote.presenter.ui.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable

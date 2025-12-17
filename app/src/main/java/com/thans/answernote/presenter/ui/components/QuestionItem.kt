@@ -1,4 +1,4 @@
-package com.thans.answernote.ui.components
+package com.thans.answernote.presenter.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,8 +11,8 @@ import com.thans.answernote.model.Answer
 @Composable
 fun QuestionItem(
     questionNumber: Int,
-    selectedAnswer: Answer,
-    onAnswerSelected: (Answer) -> Unit,
+    selectedAnswer: com.thans.answernote.presenter.model.Answer,
+    onAnswerSelected: (com.thans.answernote.presenter.model.Answer) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -38,7 +38,7 @@ fun QuestionItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                listOf(Answer.A, Answer.B, Answer.C, Answer.D).forEach { answer ->
+                listOf(_root_ide_package_.com.thans.answernote.presenter.model.Answer.A, _root_ide_package_.com.thans.answernote.presenter.model.Answer.B, _root_ide_package_.com.thans.answernote.presenter.model.Answer.C, _root_ide_package_.com.thans.answernote.presenter.model.Answer.D).forEach { answer ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.weight(1f)

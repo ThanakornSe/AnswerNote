@@ -1,4 +1,4 @@
-package com.thans.answernote.viewmodel
+package com.thans.answernote.presenter.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.thans.answernote.model.Answer
@@ -12,11 +12,15 @@ class AnswerSheetViewModel : ViewModel() {
     val numberOfQuestions: StateFlow<Int> = _numberOfQuestions.asStateFlow()
 
     private val _answers = MutableStateFlow(
-        (1..200).map { QuestionAnswer(questionNumber = it) }
+        (1..200).map {
+            _root_ide_package_.com.thans.answernote.presenter.model.QuestionAnswer(
+                questionNumber = it
+            )
+        }
     )
-    val answers: StateFlow<List<QuestionAnswer>> = _answers.asStateFlow()
+    val answers: StateFlow<List<com.thans.answernote.presenter.model.QuestionAnswer>> = _answers.asStateFlow()
 
-    fun selectAnswer(questionNumber: Int, answer: Answer) {
+    fun selectAnswer(questionNumber: Int, answer: com.thans.answernote.presenter.model.Answer) {
         _answers.value = _answers.value.map { question ->
             if (question.questionNumber == questionNumber) {
                 question.copy(selectedAnswer = answer)
@@ -28,15 +32,23 @@ class AnswerSheetViewModel : ViewModel() {
 
     fun setNumberOfQuestions(count: Int) {
         _numberOfQuestions.value = count
-        _answers.value = (1..count).map { QuestionAnswer(questionNumber = it) }
+        _answers.value = (1..count).map {
+            _root_ide_package_.com.thans.answernote.presenter.model.QuestionAnswer(
+                questionNumber = it
+            )
+        }
     }
 
     fun clearAll() {
-        _answers.value = (1.._numberOfQuestions.value).map { QuestionAnswer(questionNumber = it) }
+        _answers.value = (1.._numberOfQuestions.value).map {
+            _root_ide_package_.com.thans.answernote.presenter.model.QuestionAnswer(
+                questionNumber = it
+            )
+        }
     }
 
     fun getAnsweredCount(): Int {
-        return _answers.value.count { it.selectedAnswer != Answer.NONE }
+        return _answers.value.count { it.selectedAnswer != _root_ide_package_.com.thans.answernote.presenter.model.Answer.NONE }
     }
 
     fun markAnswerCorrectness(questionNumber: Int, isCorrect: Boolean) {
@@ -63,7 +75,7 @@ class AnswerSheetViewModel : ViewModel() {
         builder.append("\n\n")
 
         _answers.value.forEach { question ->
-            val answer = if (question.selectedAnswer == Answer.NONE) {
+            val answer = if (question.selectedAnswer == _root_ide_package_.com.thans.answernote.presenter.model.Answer.NONE) {
                 "-"
             } else {
                 question.selectedAnswer.name

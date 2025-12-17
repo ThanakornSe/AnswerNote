@@ -1,4 +1,4 @@
-package com.thans.answernote.ui.theme
+package com.thans.answernote.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

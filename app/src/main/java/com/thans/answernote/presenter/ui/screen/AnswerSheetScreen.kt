@@ -1,4 +1,4 @@
-package com.thans.answernote.ui.screen
+package com.thans.answernote.presenter.ui.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +19,7 @@ import com.thans.answernote.viewmodel.AnswerSheetViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnswerSheetScreen(
-    viewModel: AnswerSheetViewModel = viewModel(),
+    viewModel: com.thans.answernote.presenter.viewmodel.AnswerSheetViewModel = viewModel(),
     onNavigateToSummary: (() -> Unit) = {}
 ) {
     val answers by viewModel.answers.collectAsState()
@@ -69,7 +69,7 @@ fun AnswerSheetScreen(
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             items(answers) { question ->
-                QuestionItem(
+                _root_ide_package_.com.thans.answernote.presenter.ui.components.QuestionItem(
                     questionNumber = question.questionNumber,
                     selectedAnswer = question.selectedAnswer,
                     onAnswerSelected = { answer ->
@@ -81,7 +81,7 @@ fun AnswerSheetScreen(
     }
 
     if (showSettingsDialog) {
-        QuestionCountDialog(
+        _root_ide_package_.com.thans.answernote.presenter.ui.components.QuestionCountDialog(
             currentCount = numberOfQuestions,
             onDismiss = { showSettingsDialog = false },
             onConfirm = { count ->
